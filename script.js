@@ -22,7 +22,7 @@ const categories = [
     'Leather Sets'
 ];
 
-// Products Array Mapped to Image Folder
+// Products Array (Filtered to only include valid image paths)
 const products = [
     { id: 'HPK01', category: '2-in-1 Sets', name: 'Black & Gold Keyring Pen Set', image: 'image/0.jpg' },
     { id: 'HPK02', category: '2-in-1 Sets', name: 'Classic Executive Pen & Keyring', image: 'image/1.jpg' },
@@ -291,13 +291,7 @@ const products = [
     { id: 'DP37', category: 'Diary Sets', name: 'Classic Black Executive Hardbound Leatherette Journal', image: 'image/264.png' },
     { id: 'DP38', category: 'Diary Sets', name: 'Classic Grey Executive Hardbound Leatherette Journal', image: 'image/265.png' },
     { id: 'DP39', category: 'Diary Sets', name: 'Terracotta Red Executive Hardbound Leatherette Journal with Ribbon Bookmark', image: 'image/266.png' },
-    { id: 'DP40', category: 'Diary Sets', name: 'Royal Blue Executive Hardbound Leatherette Journal with Ribbon Bookmark', image: 'image/267.png' },
-    { id: 'CKP01', category: '3-in-1 Sets', name: 'Card Holder, Ball Pen & Hook Keychain', image: 'image/CKP01.jpg' },
-    { id: 'DPB01', category: 'Flask Sets', name: 'Temperature Bottle, Pen & Diary Set', image: 'image/DPB01.jpg' },
-    { id: 'DW001', category: 'Drinkware', name: 'Temperature Bottle (Black, White, Red, Blue)', image: 'image/DW001.jpg' },
-    { id: 'DW007', category: 'Drinkware', name: 'Thermos Cup Bottle 500ml', image: 'image/DW007.jpg' },
-    { id: 'VL01', category: 'Leather Accessories', name: 'Premium Executive Laptop Bag', image: 'image/VL01.jpg' },
-    { id: 'WI01', category: 'Writing Instruments', name: 'Stylus Ball Pen Metal Finish', image: 'image/WI01.jpg' }
+    { id: 'DP40', category: 'Diary Sets', name: 'Royal Blue Executive Hardbound Leatherette Journal with Ribbon Bookmark', image: 'image/267.png' }
 ];
 
 let cart = {};
@@ -310,7 +304,6 @@ function renderCategoryDropdown() {
     const categoryContainer = document.getElementById('category-tabs');
     if (!categoryContainer) return;
 
-    // Direct dropdown inject kar rahe hain target container mein
     categoryContainer.innerHTML = `
         <div class="w-full max-w-xs mx-auto py-2">
             <select id="category-select" onchange="setCategory(this.value)" 
