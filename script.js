@@ -22,7 +22,7 @@ const categories = [
     'Leather Sets'
 ];
 
-// Products Array (Filtered to only include valid image paths)
+// Cleaned Products Array (Only products with verified valid image paths)
 const products = [
     { id: 'HPK01', category: '2-in-1 Sets', name: 'Black & Gold Keyring Pen Set', image: 'image/0.jpg' },
     { id: 'HPK02', category: '2-in-1 Sets', name: 'Classic Executive Pen & Keyring', image: 'image/1.jpg' },
