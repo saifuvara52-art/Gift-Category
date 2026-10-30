@@ -22,7 +22,7 @@ const categories = [
     'Leather Sets'
 ];
 
-// Cleaned Products Array (All verified products)
+// Cleaned Products Array
 const products = [
     { id: 'HPK01', category: '2-in-1 Sets', name: 'Black & Gold Keyring Pen Set', image: 'image/0.jpg' },
     { id: 'HPK02', category: '2-in-1 Sets', name: 'Classic Executive Pen & Keyring', image: 'image/1.jpg' },
@@ -331,7 +331,7 @@ function filterProducts() {
     `).join('');
 }
 
-// Side Drawer Functions for Product Details (Amazon Style: Full-width / Full-height Image View)
+// Side Drawer Functions for Product Details (Exact Amazon Layout Style)
 function openProductDrawer(productId) {
     selectedProduct = products.find(p => p.id === productId);
     if (!selectedProduct) return;
@@ -340,57 +340,91 @@ function openProductDrawer(productId) {
     
     const drawerContainer = document.getElementById('product-drawer');
     if (drawerContainer) {
-        // Expand drawer width class on desktop if possible
-        drawerContainer.classList.remove('max-w-md');
-        drawerContainer.classList.add('max-w-xl');
+        // Expand drawer to full responsive view
+        drawerContainer.className = "fixed inset-y-0 right-0 w-full sm:w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out translate-x-full overflow-y-auto";
 
         drawerContainer.innerHTML = `
-            <div class="p-4 sm:p-6 h-full flex flex-col justify-between overflow-y-auto">
-                <div class="flex justify-between items-center border-b pb-3 mb-4">
-                    <h2 class="font-bold text-slate-900 text-base sm:text-lg">Product Details</h2>
-                    <button onclick="closeProductDrawer()" class="text-gray-500 hover:text-slate-900 font-bold text-2xl px-2">&times;</button>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center my-auto">
-                    <!-- LEFT COLUMN: FULL SIZE AMAZON STYLE IMAGE -->
-                    <div class="bg-white border rounded-xl overflow-hidden flex items-center justify-center p-2 sm:p-4 shadow-sm w-full h-64 sm:h-80">
-                        <img id="drawer-image" src="${selectedProduct.image}" alt="${selectedProduct.name}" 
-                             onerror="this.onerror=null; this.src='https://placehold.co/500x500/1e293b/f59e0b?text=${selectedProduct.id}';" 
-                             class="w-full h-full object-contain hover:scale-110 transition duration-300">
+            <div class="p-4 sm:p-8 flex flex-col justify-between min-h-full">
+                <!-- Top Header / Breadcrumb -->
+                <div>
+                    <div class="flex justify-between items-center border-b pb-3 mb-4">
+                        <nav class="text-xs text-gray-500 flex items-center gap-1">
+                            <span>Catalogue</span> &rsaquo; <span>${selectedProduct.category}</span> &rsaquo; <span class="font-bold text-slate-800">${selectedProduct.id}</span>
+                        </nav>
+                        <button onclick="closeProductDrawer()" class="text-gray-400 hover:text-slate-900 font-bold text-3xl px-2 transition">&times;</button>
                     </div>
 
-                    <!-- RIGHT COLUMN: DETAILS & ACTIONS -->
-                    <div class="flex flex-col justify-between space-y-4">
-                        <div>
-                            <span id="drawer-code" class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-md inline-block mb-2">${selectedProduct.id}</span>
-                            <h2 id="drawer-name" class="font-bold text-slate-900 text-base sm:text-xl leading-snug">${selectedProduct.name}</h2>
-                            <p id="drawer-category" class="text-xs sm:text-sm text-gray-500 mt-1">Category: <span class="font-medium text-slate-800">${selectedProduct.category}</span></p>
-                        </div>
+                    <!-- Amazon 2-Column Product Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start mt-4">
+                        
+                        <!-- LEFT SECTION: Main Large Product Image & Thumbnails (Cols 1-7) -->
+                        <div class="md:col-span-7 flex flex-col-reverse sm:flex-row gap-3 items-start">
+                            <!-- Left Mini Thumbnails Gallery (Amazon Style) -->
+                            <div class="flex sm:flex-col gap-2 w-full sm:w-auto overflow-x-auto">
+                                <div class="w-12 h-12 border-2 border-amber-500 rounded p-0.5 cursor-pointer bg-white shadow-sm flex-shrink-0">
+                                    <img src="${selectedProduct.image}" class="w-full h-full object-contain" alt="thumb">
+                                </div>
+                                <div class="w-12 h-12 border border-gray-200 rounded p-0.5 opacity-60 cursor-not-allowed bg-gray-50 flex-shrink-0">
+                                    <img src="${selectedProduct.image}" class="w-full h-full object-contain grayscale" alt="thumb2">
+                                </div>
+                            </div>
 
-                        <!-- Quantity Selector -->
-                        <div class="pt-3 border-t">
-                            <label class="block text-xs font-semibold text-gray-600 mb-2">Select Quantity:</label>
-                            <div class="flex items-center gap-3">
-                                <button onclick="changeDrawerQty(-1)" class="w-9 h-9 rounded-lg border bg-gray-100 font-bold text-slate-800 hover:bg-gray-200 transition text-base">-</button>
-                                <span id="drawer-qty" class="font-bold text-base sm:text-lg px-3">${currentDrawerQty}</span>
-                                <button onclick="changeDrawerQty(1)" class="w-9 h-9 rounded-lg border bg-gray-100 font-bold text-slate-800 hover:bg-gray-200 transition text-base">+</button>
+                            <!-- Big Main Featured Image Window -->
+                            <div class="w-full bg-white border rounded-xl p-4 sm:p-6 flex flex-col items-center justify-center relative shadow-sm group">
+                                <span class="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded shadow">Corporate Choice</span>
+                                <img id="drawer-image" src="${selectedProduct.image}" alt="${selectedProduct.name}" 
+                                     onerror="this.onerror=null; this.src='https://placehold.co/600x600/1e293b/f59e0b?text=${selectedProduct.id}';" 
+                                     class="w-full h-64 sm:h-80 md:h-96 object-contain group-hover:scale-105 transition duration-300">
+                                <p class="text-[11px] text-gray-400 mt-2 text-center">Hover to expand image</p>
                             </div>
                         </div>
 
-                        <!-- Action Buttons -->
-                        <div class="space-y-2.5 pt-3">
-                            <button onclick="addCurrentProductToCart()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm shadow transition">
-                                🛒 Add to Inquiry Cart
-                            </button>
-                            <button onclick="sendSingleWhatsAppInquiry()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm flex items-center justify-center gap-2 shadow transition">
-                                💬 Direct WhatsApp Inquiry
-                            </button>
+                        <!-- RIGHT SECTION: Amazon Specs & Action Box (Cols 8-12) -->
+                        <div class="md:col-span-5 flex flex-col space-y-4">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span id="drawer-code" class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded">${selectedProduct.id}</span>
+                                    <span class="text-xs text-amber-500 font-bold">★ 4.8 | Premium Quality</span>
+                                </div>
+                                <h1 id="drawer-name" class="font-extrabold text-slate-900 text-lg sm:text-2xl leading-snug">${selectedProduct.name}</h1>
+                                <p id="drawer-category" class="text-xs text-gray-500 mt-1">Category: <span class="font-semibold text-slate-800">${selectedProduct.category}</span></p>
+                            </div>
+
+                            <div class="border-t border-b py-3 space-y-1 text-xs text-gray-600">
+                                <p>✔️ <strong>Custom Logo Branding:</strong> Available on bulk orders</p>
+                                <p>✔️ <strong>Packaging:</strong> Premium Corporate Gift Box Included</p>
+                                <p>✔️ <strong>Dispatch:</strong> Fast Pan-India Shipping</p>
+                            </div>
+
+                            <!-- Amazon Style Buy Box / Quantity Picker -->
+                            <div class="bg-slate-50 border rounded-lg p-4 space-y-4 shadow-inner">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-800 mb-1.5">Select Bulk Quantity:</label>
+                                    <div class="flex items-center gap-3 bg-white border w-max px-2 py-1 rounded-lg shadow-sm">
+                                        <button onclick="changeDrawerQty(-1)" class="w-8 h-8 rounded border bg-gray-100 font-bold text-slate-800 hover:bg-gray-200 transition text-base">-</button>
+                                        <span id="drawer-qty" class="font-bold text-base px-3 text-slate-900">${currentDrawerQty}</span>
+                                        <button onclick="changeDrawerQty(1)" class="w-8 h-8 rounded border bg-gray-100 font-bold text-slate-800 hover:bg-gray-200 transition text-base">+</button>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="space-y-2.5 pt-2">
+                                    <button onclick="addCurrentProductToCart()" class="w-full bg-slate-900 hover:bg-amber-500 hover:text-slate-900 text-white font-bold py-3 rounded-lg text-xs sm:text-sm shadow transition">
+                                        🛒 Add to Inquiry Cart
+                                    </button>
+                                    <button onclick="sendSingleWhatsAppInquiry()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg text-xs sm:text-sm flex items-center justify-center gap-2 shadow transition">
+                                        💬 Instant WhatsApp Quote
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
-                <div class="text-center pt-4 border-t text-[11px] text-gray-400 mt-4">
-                    Fast Corporate Bulk Quotes via WhatsApp
+                <!-- Footer note -->
+                <div class="text-center pt-6 border-t text-xs text-gray-400 mt-6">
+                    Official Corporate Gifting Catalogue &bull; Fast Direct Quotes
                 </div>
             </div>
         `;
