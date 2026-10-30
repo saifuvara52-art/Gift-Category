@@ -22,7 +22,7 @@ const categories = [
     'Leather Sets'
 ];
 
-// Fully Cleaned Products Array (All missing/placeholder image items removed)
+// Cleaned Products Array (All verified products)
 const products = [
     { id: 'HPK01', category: '2-in-1 Sets', name: 'Black & Gold Keyring Pen Set', image: 'image/0.jpg' },
     { id: 'HPK02', category: '2-in-1 Sets', name: 'Classic Executive Pen & Keyring', image: 'image/1.jpg' },
@@ -258,6 +258,15 @@ let activeCategory = 'All';
 let selectedProduct = null;
 let currentDrawerQty = 1;
 
+// Helper to get full absolute image URL for WhatsApp sharing
+function getFullImageUrl(imagePath) {
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        return imagePath;
+    }
+    const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');
+    return baseUrl + imagePath;
+}
+
 // Dropdown Populate Function
 function renderCategoryDropdown() {
     const categoryContainer = document.getElementById('category-tabs');
@@ -322,18 +331,67 @@ function filterProducts() {
     `).join('');
 }
 
-// Side Drawer Functions for Product Details
+// Side Drawer Functions for Product Details (Amazon/Flipkart Split View: Image Left, Info Right)
 function openProductDrawer(productId) {
     selectedProduct = products.find(p => p.id === productId);
     if (!selectedProduct) return;
 
     currentDrawerQty = 1;
-    document.getElementById('drawer-qty').innerText = currentDrawerQty;
-    document.getElementById('drawer-title').innerText = selectedProduct.id;
-    document.getElementById('drawer-code').innerText = selectedProduct.id;
-    document.getElementById('drawer-name').innerText = selectedProduct.name;
-    document.getElementById('drawer-category').innerText = selectedProduct.category;
-    document.getElementById('drawer-image').src = selectedProduct.image;
+    
+    // Injecting Amazon/Flipkart style side-by-side layout inside product drawer
+    const drawerContainer = document.getElementById('product-drawer');
+    if (drawerContainer) {
+        drawerContainer.innerHTML = `
+            <div class="p-4 sm:p-6 h-full flex flex-col justify-between overflow-y-auto">
+                <div class="flex justify-between items-center border-b pb-3 mb-4">
+                    <h2 class="font-bold text-slate-900 text-base sm:text-lg">Product Details</h2>
+                    <button onclick="closeProductDrawer()" class="text-gray-500 hover:text-slate-900 font-bold text-xl px-2">&times;</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start my-auto">
+                    <!-- LEFT COLUMN: Product Image -->
+                    <div class="bg-gray-50 border rounded-lg overflow-hidden flex items-center justify-center p-2 sm:p-4 shadow-inner">
+                        <img id="drawer-image" src="${selectedProduct.image}" alt="${selectedProduct.name}" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/400x300/1e293b/f59e0b?text=${selectedProduct.id}';" 
+                             class="max-h-56 sm:max-h-72 w-full object-contain hover:scale-105 transition duration-300">
+                    </div>
+
+                    <!-- RIGHT COLUMN: Information & Action -->
+                    <div class="flex flex-col justify-between h-full space-y-3 sm:space-y-4">
+                        <div>
+                            <span id="drawer-code" class="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded inline-block mb-1 sm:mb-2">${selectedProduct.id}</span>
+                            <h2 id="drawer-name" class="font-bold text-slate-900 text-base sm:text-xl leading-snug">${selectedProduct.name}</h2>
+                            <p id="drawer-category" class="text-xs sm:text-sm text-gray-500 mt-1">Category: <span class="font-medium text-slate-700">${selectedProduct.category}</span></p>
+                        </div>
+
+                        <!-- Quantity Selector -->
+                        <div class="pt-2 border-t">
+                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Select Quantity:</label>
+                            <div class="flex items-center gap-3">
+                                <button onclick="changeDrawerQty(-1)" class="w-8 h-8 rounded border bg-gray-100 font-bold text-slate-800 hover:bg-gray-200 transition">-</button>
+                                <span id="drawer-qty" class="font-bold text-sm sm:text-base px-3">${currentDrawerQty}</span>
+                                <button onclick="changeDrawerQty(1)" class="w-8 h-8 rounded border bg-gray-100 font-bold text-slate-800 hover:bg-gray-200 transition">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="space-y-2 pt-2">
+                            <button onclick="addCurrentProductToCart()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm shadow-sm transition">
+                                🛒 Add to Inquiry Cart
+                            </button>
+                            <button onclick="sendSingleWhatsAppInquiry()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition">
+                                💬 Direct WhatsApp Inquiry
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center pt-4 border-t text-[11px] text-gray-400 mt-4">
+                    Fast Corporate Bulk Quotes via WhatsApp
+                </div>
+            </div>
+        `;
+    }
 
     document.getElementById('product-drawer').classList.remove('translate-x-full');
     document.getElementById('backdrop').classList.remove('hidden');
@@ -346,7 +404,8 @@ function closeProductDrawer() {
 
 function changeDrawerQty(delta) {
     currentDrawerQty = Math.max(1, currentDrawerQty + delta);
-    document.getElementById('drawer-qty').innerText = currentDrawerQty;
+    const qtyElem = document.getElementById('drawer-qty');
+    if (qtyElem) qtyElem.innerText = currentDrawerQty;
 }
 
 function addCurrentProductToCart() {
@@ -366,7 +425,8 @@ function addCurrentProductToCart() {
 function sendSingleWhatsAppInquiry() {
     if (!selectedProduct) return;
 
-    const message = `Hello, I am interested in inquiring about:\n\n*Code:* ${selectedProduct.id}\n*Product:* ${selectedProduct.name}\n*Quantity:* ${currentDrawerQty}\n\nPlease share the pricing and availability.`;
+    const fullImgUrl = getFullImageUrl(selectedProduct.image);
+    const message = `Hello, I am interested in inquiring about:\n\n*Code:* ${selectedProduct.id}\n*Product:* ${selectedProduct.name}\n*Quantity:* ${currentDrawerQty}\n*Image Link:* ${fullImgUrl}\n\nPlease share the pricing and availability.`;
     const whatsappUrl = `https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
 }
@@ -394,10 +454,13 @@ function updateQuantity(productId, change) {
 
 function updateCartUI() {
     const totalCount = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
-    document.getElementById('cart-count').innerText = totalCount;
-    document.getElementById('drawer-cart-count').innerText = totalCount;
+    const countBadge = document.getElementById('cart-count');
+    const drawerBadge = document.getElementById('drawer-cart-count');
+    if (countBadge) countBadge.innerText = totalCount;
+    if (drawerBadge) drawerBadge.innerText = totalCount;
 
     const cartItemsContainer = document.getElementById('cart-items');
+    if (!cartItemsContainer) return;
     
     if (Object.keys(cart).length === 0) {
         cartItemsContainer.innerHTML = `<div class="text-center py-12 text-gray-400 text-xs sm:text-sm">Your cart is empty. Tap items to add inquiries.</div>`;
@@ -406,9 +469,12 @@ function updateCartUI() {
 
     cartItemsContainer.innerHTML = Object.values(cart).map(item => `
         <div class="py-3 flex justify-between items-center gap-2 border-b">
-            <div class="flex-grow">
-                <p class="font-bold text-xs text-slate-900">${item.id} - ${item.name}</p>
-                <p class="text-[10px] text-gray-500">${item.category}</p>
+            <div class="flex items-center gap-2 flex-grow">
+                <img src="${item.image}" class="w-10 h-10 object-cover rounded border" alt="${item.id}">
+                <div>
+                    <p class="font-bold text-xs text-slate-900">${item.id} - ${item.name}</p>
+                    <p class="text-[10px] text-gray-500">${item.category}</p>
+                </div>
             </div>
             <div class="flex items-center gap-2 bg-gray-100 rounded px-2 py-1">
                 <button onclick="updateQuantity('${item.id}', -1)" class="text-gray-600 font-bold px-1 text-xs hover:text-slate-900">-</button>
@@ -422,27 +488,37 @@ function updateCartUI() {
 function toggleCart() {
     const cartDrawer = document.getElementById('cart-drawer');
     closeProductDrawer();
-    cartDrawer.classList.toggle('translate-x-full');
+    if (cartDrawer) cartDrawer.classList.toggle('translate-x-full');
     checkBackdrop();
 }
 
 function closeAllDrawers() {
-    document.getElementById('product-drawer').classList.add('translate-x-full');
-    document.getElementById('cart-drawer').classList.add('translate-x-full');
-    document.getElementById('backdrop').classList.add('hidden');
+    const productDrawer = document.getElementById('product-drawer');
+    const cartDrawer = document.getElementById('cart-drawer');
+    const backdrop = document.getElementById('backdrop');
+    if (productDrawer) productDrawer.classList.add('translate-x-full');
+    if (cartDrawer) cartDrawer.classList.add('translate-x-full');
+    if (backdrop) backdrop.classList.add('hidden');
 }
 
 function checkBackdrop() {
-    const isCartOpen = !document.getElementById('cart-drawer').classList.contains('translate-x-full');
-    const isProductOpen = !document.getElementById('product-drawer').classList.contains('translate-x-full');
+    const cartDrawer = document.getElementById('cart-drawer');
+    const productDrawer = document.getElementById('product-drawer');
+    const backdrop = document.getElementById('backdrop');
+
+    const isCartOpen = cartDrawer && !cartDrawer.classList.contains('translate-x-full');
+    const isProductOpen = productDrawer && !productDrawer.classList.contains('translate-x-full');
     
-    if (isCartOpen || isProductOpen) {
-        document.getElementById('backdrop').classList.remove('hidden');
-    } else {
-        document.getElementById('backdrop').classList.add('hidden');
+    if (backdrop) {
+        if (isCartOpen || isProductOpen) {
+            backdrop.classList.remove('hidden');
+        } else {
+            backdrop.classList.add('hidden');
+        }
     }
 }
 
+// Checkout with Product Images Sent Directly in WhatsApp Message
 function sendToWhatsApp() {
     const items = Object.values(cart);
     if (items.length === 0) {
@@ -452,9 +528,10 @@ function sendToWhatsApp() {
 
     let message = "Hello, I would like to inquire about the following corporate gifts:\n\n";
     items.forEach((item, index) => {
-        message += `${index + 1}. Code: *${item.id}* | Qty: *${item.qty}* (${item.name})\n`;
+        const fullImgUrl = getFullImageUrl(item.image);
+        message += `${index + 1}. Code: *${item.id}* | Qty: *${item.qty}*\n   Name: ${item.name}\n   Image: ${fullImgUrl}\n\n`;
     });
-    message += "\nPlease let me know the availability and pricing.";
+    message += "Please let me know the availability and pricing.";
 
     const whatsappUrl = `https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
