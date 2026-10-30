@@ -331,55 +331,58 @@ function filterProducts() {
     `).join('');
 }
 
-// Side Drawer Functions for Product Details (Amazon/Flipkart Split View: Image Left, Info Right)
+// Side Drawer Functions for Product Details (Amazon Style: Full-width / Full-height Image View)
 function openProductDrawer(productId) {
     selectedProduct = products.find(p => p.id === productId);
     if (!selectedProduct) return;
 
     currentDrawerQty = 1;
     
-    // Injecting Amazon/Flipkart style side-by-side layout inside product drawer
     const drawerContainer = document.getElementById('product-drawer');
     if (drawerContainer) {
+        // Expand drawer width class on desktop if possible
+        drawerContainer.classList.remove('max-w-md');
+        drawerContainer.classList.add('max-w-xl');
+
         drawerContainer.innerHTML = `
             <div class="p-4 sm:p-6 h-full flex flex-col justify-between overflow-y-auto">
                 <div class="flex justify-between items-center border-b pb-3 mb-4">
                     <h2 class="font-bold text-slate-900 text-base sm:text-lg">Product Details</h2>
-                    <button onclick="closeProductDrawer()" class="text-gray-500 hover:text-slate-900 font-bold text-xl px-2">&times;</button>
+                    <button onclick="closeProductDrawer()" class="text-gray-500 hover:text-slate-900 font-bold text-2xl px-2">&times;</button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-start my-auto">
-                    <!-- LEFT COLUMN: Product Image -->
-                    <div class="bg-gray-50 border rounded-lg overflow-hidden flex items-center justify-center p-2 sm:p-4 shadow-inner">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center my-auto">
+                    <!-- LEFT COLUMN: FULL SIZE AMAZON STYLE IMAGE -->
+                    <div class="bg-white border rounded-xl overflow-hidden flex items-center justify-center p-2 sm:p-4 shadow-sm w-full h-64 sm:h-80">
                         <img id="drawer-image" src="${selectedProduct.image}" alt="${selectedProduct.name}" 
-                             onerror="this.onerror=null; this.src='https://placehold.co/400x300/1e293b/f59e0b?text=${selectedProduct.id}';" 
-                             class="max-h-56 sm:max-h-72 w-full object-contain hover:scale-105 transition duration-300">
+                             onerror="this.onerror=null; this.src='https://placehold.co/500x500/1e293b/f59e0b?text=${selectedProduct.id}';" 
+                             class="w-full h-full object-contain hover:scale-110 transition duration-300">
                     </div>
 
-                    <!-- RIGHT COLUMN: Information & Action -->
-                    <div class="flex flex-col justify-between h-full space-y-3 sm:space-y-4">
+                    <!-- RIGHT COLUMN: DETAILS & ACTIONS -->
+                    <div class="flex flex-col justify-between space-y-4">
                         <div>
-                            <span id="drawer-code" class="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded inline-block mb-1 sm:mb-2">${selectedProduct.id}</span>
+                            <span id="drawer-code" class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-md inline-block mb-2">${selectedProduct.id}</span>
                             <h2 id="drawer-name" class="font-bold text-slate-900 text-base sm:text-xl leading-snug">${selectedProduct.name}</h2>
-                            <p id="drawer-category" class="text-xs sm:text-sm text-gray-500 mt-1">Category: <span class="font-medium text-slate-700">${selectedProduct.category}</span></p>
+                            <p id="drawer-category" class="text-xs sm:text-sm text-gray-500 mt-1">Category: <span class="font-medium text-slate-800">${selectedProduct.category}</span></p>
                         </div>
 
                         <!-- Quantity Selector -->
-                        <div class="pt-2 border-t">
-                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">Select Quantity:</label>
+                        <div class="pt-3 border-t">
+                            <label class="block text-xs font-semibold text-gray-600 mb-2">Select Quantity:</label>
                             <div class="flex items-center gap-3">
-                                <button onclick="changeDrawerQty(-1)" class="w-8 h-8 rounded border bg-gray-100 font-bold text-slate-800 hover:bg-gray-200 transition">-</button>
-                                <span id="drawer-qty" class="font-bold text-sm sm:text-base px-3">${currentDrawerQty}</span>
-                                <button onclick="changeDrawerQty(1)" class="w-8 h-8 rounded border bg-gray-100 font-bold text-slate-800 hover:bg-gray-200 transition">+</button>
+                                <button onclick="changeDrawerQty(-1)" class="w-9 h-9 rounded-lg border bg-gray-100 font-bold text-slate-800 hover:bg-gray-200 transition text-base">-</button>
+                                <span id="drawer-qty" class="font-bold text-base sm:text-lg px-3">${currentDrawerQty}</span>
+                                <button onclick="changeDrawerQty(1)" class="w-9 h-9 rounded-lg border bg-gray-100 font-bold text-slate-800 hover:bg-gray-200 transition text-base">+</button>
                             </div>
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="space-y-2 pt-2">
-                            <button onclick="addCurrentProductToCart()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm shadow-sm transition">
+                        <div class="space-y-2.5 pt-3">
+                            <button onclick="addCurrentProductToCart()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm shadow transition">
                                 🛒 Add to Inquiry Cart
                             </button>
-                            <button onclick="sendSingleWhatsAppInquiry()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition">
+                            <button onclick="sendSingleWhatsAppInquiry()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm flex items-center justify-center gap-2 shadow transition">
                                 💬 Direct WhatsApp Inquiry
                             </button>
                         </div>
